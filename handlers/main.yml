@@ -3,6 +3,11 @@
     name: systemd-journald
     state: restarted
 
+# journald only moves to disk when asked; at boot systemd-journal-flush.service asks.
+- name: Move the journal onto disk
+  ansible.builtin.command: journalctl --flush
+  changed_when: true
+
 # The role never reboots. It leaves Debian's standard flag for whoever does.
 - name: Flag that a reboot is needed
   ansible.builtin.copy:
