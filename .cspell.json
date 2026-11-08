@@ -26,6 +26,7 @@
     "journalctl",
     "journald",
     "noreply",
+    "pieeprom",
     "proc",
     "raspberrypi",
     "raspios",

@@ -86,8 +86,10 @@
   failed_when: raspberry_pi_baseline_eeprom.rc not in [0, 1]
   when: raspberry_pi_baseline_on_pi
 
+# A staged update waits in /boot/firmware until the next boot applies it.
 - name: Stage the EEPROM update
-  ansible.builtin.command: rpi-eeprom-update -a
-  changed_when: true
+  ansible.builtin.command:
+    cmd: rpi-eeprom-update -a
+    creates: /boot/firmware/pieeprom.upd
   when: raspberry_pi_baseline_on_pi and raspberry_pi_baseline_eeprom.rc == 1
   notify: Flag that a reboot is needed
