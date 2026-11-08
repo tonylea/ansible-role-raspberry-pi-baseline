@@ -52,11 +52,13 @@
     group: root
     mode: "0755"
 
-- name: Cap the journal's size on disk
+# Pi OS keeps the journal in RAM only, so logs from before a crash or reboot would be lost.
+- name: Keep the journal on disk, capped
   ansible.builtin.copy:
-    dest: /etc/systemd/journald.conf.d/90-size.conf
+    dest: /etc/systemd/journald.conf.d/90-persistent.conf
     content: |
       [Journal]
+      Storage=persistent
       SystemMaxUse={{ raspberry_pi_baseline_journal_max_size }}
     owner: root
     group: root
