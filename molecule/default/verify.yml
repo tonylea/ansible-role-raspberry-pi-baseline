@@ -38,9 +38,14 @@
       register: journald
       changed_when: false
 
+    - name: Pick out journald's latest report of where the journal is
+      ansible.builtin.set_fact:
+        journal_report: "{{ journald.stdout_lines | select('search', 'Journal [(]') | list | last }}"
+
     - name: Journald keeps the journal on disk, capped at 200M
       ansible.builtin.assert:
-        that: (journald.stdout_lines | select('search', 'Journal \\(') | list | last) is search('^System Journal \\(/var/log/journal/.*max 200(\\.0)?M')
+        that: journal_report is search('^System Journal [(]/var/log/journal/.*max 200([.]0)?M')
+        fail_msg: "journald reported: {{ journal_report }}"
 
     - name: Check for the EEPROM updater
       ansible.builtin.stat:
