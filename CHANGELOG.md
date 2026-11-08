@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.0.1](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/compare/v1.0.0...v1.0.1) (2026-11-08)
+
+### Bug Fixes
+
+* stage an EEPROM update once, not again on every run before reboot ([ce41eb3](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/commit/ce41eb3cb4df7f03c8769d867f0450746f2922e5))
+
 ## 1.0.0 (2026-11-08)
 
 ### Features
