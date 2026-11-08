@@ -1,0 +1,26 @@
+# A container has no Pi firmware or persistent journal, so give it the parts of a fresh Pi OS install this role edits.
+- name: Prepare
+  hosts: all
+  tasks:
+    - name: Create the boot partition's mount point
+      ansible.builtin.file:
+        path: /boot/firmware
+        state: directory
+        mode: "0755"
+
+    # Pi OS's own default, from RPi-Distro/pi-gen tag 2026-10-06-raspios-trixie-arm64.
+    - name: Add Pi OS's default config.txt
+      ansible.builtin.copy:
+        src: config.txt
+        dest: /boot/firmware/config.txt
+        mode: "0755"
+
+    - name: Keep the journal on disk, as Pi OS does
+      ansible.builtin.file:
+        path: /var/log/journal
+        state: directory
+        mode: "2755"
+
+    - name: Move the journal onto disk
+      ansible.builtin.command: journalctl --flush
+      changed_when: true

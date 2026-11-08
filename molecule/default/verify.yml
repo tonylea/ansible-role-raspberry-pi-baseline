@@ -1,0 +1,61 @@
+- name: Verify
+  hosts: all
+  become: true
+  vars:
+    original_config: "{{ lookup('ansible.builtin.file', 'files/config.txt').splitlines() }}"
+  tasks:
+    - name: Read config.txt
+      ansible.builtin.slurp:
+        src: /boot/firmware/config.txt
+      register: config
+
+    - name: Split config.txt into lines
+      ansible.builtin.set_fact:
+        config_lines: "{{ (config.content | b64decode).splitlines() }}"
+
+    - name: Pi OS's own settings are untouched
+      ansible.builtin.assert:
+        that: config_lines[:original_config | length] == original_config
+
+    - name: Wi-Fi and Bluetooth are turned off once, for every Pi model
+      ansible.builtin.assert:
+        that:
+          - config_lines | select('equalto', 'dtoverlay=disable-wifi') | list | length == 1
+          - config_lines | select('equalto', 'dtoverlay=disable-bt') | list | length == 1
+          - config_lines[original_config | length:] is contains('[all]')
+
+    - name: Read the swap drop-in
+      ansible.builtin.command: cat /etc/rpi/swap.conf.d/90-no-swap.conf
+      register: swap
+      changed_when: false
+
+    - name: Pi OS's swap manager is told to use no swap
+      ansible.builtin.assert:
+        that: swap.stdout_lines == ["[Main]", "Mechanism=none"]
+
+    - name: Ask journald what limit it is applying
+      ansible.builtin.command: journalctl --boot --unit systemd-journald --no-pager --output cat
+      register: journald
+      changed_when: false
+
+    - name: Journald caps the journal at 200M
+      ansible.builtin.assert:
+        that: (journald.stdout_lines | select('search', 'System Journal .* max ') | list | last) is search('max 200\.0M')
+
+    - name: Check for the EEPROM updater
+      ansible.builtin.stat:
+        path: /usr/bin/rpi-eeprom-update
+      register: eeprom
+
+    - name: Firmware tasks are skipped off a Pi
+      ansible.builtin.assert:
+        that: not eeprom.stat.exists
+
+    - name: Check for the reboot flag
+      ansible.builtin.stat:
+        path: /run/reboot-required
+      register: reboot_flag
+
+    - name: The role asks for a reboot instead of rebooting
+      ansible.builtin.assert:
+        that: reboot_flag.stat.exists
