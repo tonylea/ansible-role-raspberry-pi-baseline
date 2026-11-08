@@ -38,9 +38,9 @@
       register: journald
       changed_when: false
 
-    - name: Journald caps the journal at 200M
+    - name: Journald keeps the journal on disk, capped at 200M
       ansible.builtin.assert:
-        that: (journald.stdout_lines | select('search', 'System Journal .* max ') | list | last) is search('max 200\.0M')
+        that: (journald.stdout_lines | select('search', 'Journal \\(') | list | last) is search('^System Journal \\(/var/log/journal/.*max 200(\\.0)?M')
 
     - name: Check for the EEPROM updater
       ansible.builtin.stat:

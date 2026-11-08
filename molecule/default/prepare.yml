@@ -1,4 +1,4 @@
-# A container has no Pi firmware or persistent journal, so give it the parts of a fresh Pi OS install this role edits.
+# A container is not Pi OS, so give it the parts of a fresh Pi OS install this role changes.
 - name: Prepare
   hosts: all
   tasks:
@@ -15,12 +15,22 @@
         dest: /boot/firmware/config.txt
         mode: "0755"
 
-    - name: Keep the journal on disk, as Pi OS does
+    - name: Create the system journald drop-in directory
       ansible.builtin.file:
-        path: /var/log/journal
+        path: /usr/lib/systemd/journald.conf.d
         state: directory
-        mode: "2755"
+        mode: "0755"
 
-    - name: Move the journal onto disk
-      ansible.builtin.command: journalctl --flush
-      changed_when: true
+    # Pi OS's own drop-in from its raspberrypi-sys-mods package, which keeps the journal in RAM only.
+    - name: Keep the journal in RAM, as Pi OS does
+      ansible.builtin.copy:
+        dest: /usr/lib/systemd/journald.conf.d/40-rpi-volatile-storage.conf
+        content: |
+          [Journal]
+          Storage=volatile
+        mode: "0644"
+
+    - name: Restart journald with Pi OS's settings
+      ansible.builtin.systemd_service:
+        name: systemd-journald
+        state: restarted
