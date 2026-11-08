@@ -1,0 +1,89 @@
+- name: Check for a device tree model
+  ansible.builtin.stat:
+    path: /proc/device-tree/model
+  register: raspberry_pi_baseline_model_file
+
+- name: Read the device tree model
+  ansible.builtin.slurp:
+    src: /proc/device-tree/model
+  register: raspberry_pi_baseline_model
+  when: raspberry_pi_baseline_model_file.stat.exists
+
+# Hardware tasks (firmware, EEPROM) only run on a real Pi.
+- name: Work out whether this is a real Raspberry Pi
+  ansible.builtin.set_fact:
+    raspberry_pi_baseline_on_pi: "{{ raspberry_pi_baseline_model_file.stat.exists and 'Raspberry Pi' in (raspberry_pi_baseline_model.content | b64decode) }}"
+
+- name: Turn off Wi-Fi and Bluetooth
+  ansible.builtin.blockinfile:
+    path: /boot/firmware/config.txt
+    marker: "# {mark} ANSIBLE MANAGED: radios off"
+    insertafter: EOF
+    block: |
+      [all]
+      dtoverlay=disable-wifi
+      dtoverlay=disable-bt
+  notify: Flag that a reboot is needed
+
+- name: Create the swap drop-in directory
+  ansible.builtin.file:
+    path: /etc/rpi/swap.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Turn off swap
+  ansible.builtin.copy:
+    dest: /etc/rpi/swap.conf.d/90-no-swap.conf
+    content: |
+      [Main]
+      Mechanism=none
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Flag that a reboot is needed
+
+- name: Create the journald drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Cap the journal's size on disk
+  ansible.builtin.copy:
+    dest: /etc/systemd/journald.conf.d/90-size.conf
+    content: |
+      [Journal]
+      SystemMaxUse={{ raspberry_pi_baseline_journal_max_size }}
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart journald
+
+- name: Install the EEPROM updater
+  ansible.builtin.apt:
+    name: rpi-eeprom
+    state: present
+  when: raspberry_pi_baseline_on_pi
+
+- name: Apply staged EEPROM updates at boot
+  ansible.builtin.systemd_service:
+    name: rpi-eeprom-update
+    enabled: true
+  when: raspberry_pi_baseline_on_pi
+
+- name: Check for an EEPROM update
+  ansible.builtin.command: rpi-eeprom-update
+  register: raspberry_pi_baseline_eeprom
+  changed_when: false
+  failed_when: raspberry_pi_baseline_eeprom.rc not in [0, 1]
+  when: raspberry_pi_baseline_on_pi
+
+- name: Stage the EEPROM update
+  ansible.builtin.command: rpi-eeprom-update -a
+  changed_when: true
+  when: raspberry_pi_baseline_on_pi and raspberry_pi_baseline_eeprom.rc == 1
+  notify: Flag that a reboot is needed

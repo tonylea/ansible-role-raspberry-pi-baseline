@@ -1,0 +1,13 @@
+galaxy_info:
+  namespace: tonylea
+  role_name: raspberry_pi_baseline
+  author: Tony Lea
+  description: Raspberry Pi OS settings for wired, swap-free nodes
+  license: MIT
+  min_ansible_version: "2.20"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie
+
+dependencies: []

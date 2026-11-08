@@ -1,0 +1,13 @@
+- name: Restart journald
+  ansible.builtin.systemd_service:
+    name: systemd-journald
+    state: restarted
+
+# The role never reboots. It leaves Debian's standard flag for whoever does.
+- name: Flag that a reboot is needed
+  ansible.builtin.copy:
+    dest: /run/reboot-required
+    content: ""
+    owner: root
+    group: root
+    mode: "0644"
