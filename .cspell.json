@@ -1,0 +1,45 @@
+{
+  "version": "0.2",
+  "language": "en-GB",
+  "dictionaries": [
+    "softwareTerms"
+  ],
+  "ignorePaths": [
+    ".git/**",
+    ".husky/**",
+    "node_modules/**",
+    "CHANGELOG.md",
+    "package-lock.json",
+    "molecule/default/files/**"
+  ],
+  "words": [
+    "blockinfile",
+    "bootfs",
+    "cgroupns",
+    "commitlint",
+    "dbus",
+    "dtoverlay",
+    "EEPROM",
+    "equalto",
+    "homelab",
+    "insertafter",
+    "journalctl",
+    "journald",
+    "noreply",
+    "proc",
+    "raspberrypi",
+    "raspios",
+    "rpi",
+    "secretlint",
+    "SIGRTMIN",
+    "slurp",
+    "splitlines",
+    "sysv",
+    "tmpfs",
+    "tonylea",
+    "trixie",
+    "vars",
+    "wifi",
+    "zram"
+  ]
+}
