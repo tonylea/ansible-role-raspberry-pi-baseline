@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [2.0.0](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/compare/v1.0.1...v2.0.0) (2026-11-10)
+
+### ⚠ BREAKING CHANGES
+
+* raspberry_pi_baseline_journal_max_size is removed.
+
+### Features
+
+* stop capping the journal's size ([e5d1ae9](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/commit/e5d1ae908af552e801fd1496aaa4fe42cefbf849))
+
+### Documentation
+
+* add a contributing guide ([4ab81d0](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/commit/4ab81d05d5e134605bed9fce246de0d8bd238b28))
+* put each sentence of the README on its own line ([02a6c4b](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/commit/02a6c4bc7b363bd4f060f82bed204095db3dce4c))
+
 ## [1.0.1](https://github.com/tonylea/ansible-role-raspberry-pi-baseline/compare/v1.0.0...v1.0.1) (2026-11-08)
 
 ### Bug Fixes

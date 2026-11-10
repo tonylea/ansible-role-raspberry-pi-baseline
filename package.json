@@ -1,6 +1,6 @@
 {
   "name": "ansible-role-raspberry-pi-baseline",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "Raspberry Pi OS settings for wired, swap-free nodes",
   "private": true,
   "repository": {
