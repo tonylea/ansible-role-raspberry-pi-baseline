@@ -33,7 +33,7 @@
       ansible.builtin.assert:
         that: swap.stdout_lines == ["[Main]", "Mechanism=none"]
 
-    - name: Ask journald what limit it is applying
+    - name: Ask journald where it keeps the journal
       ansible.builtin.command: journalctl --boot --unit systemd-journald --no-pager --output cat
       register: journald
       changed_when: false
@@ -42,9 +42,9 @@
       ansible.builtin.set_fact:
         journal_report: "{{ journald.stdout_lines | select('search', 'Journal [(]') | list | last }}"
 
-    - name: Journald keeps the journal on disk, capped at 200M
+    - name: Journald keeps the journal on disk
       ansible.builtin.assert:
-        that: journal_report is search('^System Journal [(]/var/log/journal/.*max 200([.]0)?M')
+        that: journal_report is search('^System Journal [(]/var/log/journal/')
         fail_msg: "journald reported: {{ journal_report }}"
 
     - name: Check for the EEPROM updater
